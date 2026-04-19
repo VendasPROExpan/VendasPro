@@ -113,6 +113,15 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:1
 .btn-add-model:hover{border-color:var(--brand);color:var(--brand-dk);background:var(--brand-bg-soft)}
 
 /* DATA ACTIONS */
+.load-data-banner{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 24px;background:linear-gradient(135deg,var(--brand-bg-soft),var(--success-bg));border:1.5px solid var(--brand-bg-mid);border-radius:var(--r);margin-bottom:24px}
+.load-data-content{display:flex;align-items:center;gap:16px;flex:1}
+.load-data-icon{font-size:32px;line-height:1}
+.load-data-text{flex:1}
+.load-data-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.load-data-desc{font-size:12px;color:var(--muted)}
+.btn-load-data{padding:10px 20px;background:var(--brand);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-b);transition:all .15s;white-space:nowrap}
+.btn-load-data:hover{background:var(--brand-dk);transform:translateY(-1px);box-shadow:var(--sh)}
+
 .data-actions{display:flex;gap:10px;margin-bottom:20px;padding:16px;background:var(--brand-bg-soft);border:1px solid var(--brand-bg-mid);border-radius:var(--r);align-items:center}
 .btn-data{flex:1;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .18s;font-family:var(--font-b)}
 .btn-data:hover{border-color:var(--brand);background:var(--brand-bg-soft);transform:translateY(-1px);box-shadow:var(--sh)}
@@ -442,6 +451,21 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:1
     <div class="scr-title">Qual tipo de contrato?</div>
     <div class="scr-sub">Escolha o modelo. Os que têm template Word salvo aparecem com ✓.</div>
   </div>
+  
+  <div class="load-data-banner">
+    <div class="load-data-content">
+      <div class="load-data-icon">📂</div>
+      <div class="load-data-text">
+        <div class="load-data-title">Continuar contrato anterior?</div>
+        <div class="load-data-desc">Carregue os dados salvos para preencher tudo automaticamente</div>
+      </div>
+    </div>
+    <button class="btn-load-data" onclick="document.getElementById('importFileInput').click()">
+      Carregar Dados (.json)
+    </button>
+    <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importarDados(event)">
+  </div>
+  
   <div class="model-grid" id="modelGrid"></div>
   <button class="btn-add-model" onclick="abrirModal()">＋ Adicionar modelo personalizado</button>
   <div class="nav-bar">
@@ -658,18 +682,12 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:1
     <div class="scr-sub">Confira os dados antes de gerar o documento Word.</div>
   </div>
   
-  <div class="data-actions">
-    <button class="btn-data" onclick="exportarDados()" title="Salvar todos os dados em arquivo JSON">
+  <div class="data-actions" style="justify-content:center">
+    <button class="btn-data" onclick="exportarDados()" title="Salvar todos os dados em arquivo JSON para continuar depois">
       <span class="btn-data-icon">💾</span>
       <span class="btn-data-label">Salvar Dados</span>
-      <span class="btn-data-desc">Exportar JSON</span>
+      <span class="btn-data-desc">Backup antes de gerar</span>
     </button>
-    <button class="btn-data" onclick="document.getElementById('importFileInput').click()" title="Carregar dados de um arquivo JSON salvo anteriormente">
-      <span class="btn-data-icon">📂</span>
-      <span class="btn-data-label">Carregar Dados</span>
-      <span class="btn-data-desc">Importar JSON</span>
-    </button>
-    <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importarDados(event)">
   </div>
   
   <div id="successBanner" style="display:none" class="success">
