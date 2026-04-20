@@ -1402,7 +1402,51 @@ async function extractFromMultiFile(file,category){
   // Montar prompt baseado na categoria
   let prompt='';
   if(category==='vendedores'||category==='compradores'){
-    prompt=`Você está extraindo dados de documentos de pessoa física (vendedor ou comprador de imóvel). Analise o documento e retorne APENAS um objeto JSON válido, sem texto antes ou depois.
+    prompt=`Você está extraindo dados de documentos relacionados a ${category==='vendedores'?'vendedores':'compradores'} de imóvel. Analise o documento e retorne APENAS um objeto JSON válido, sem texto antes ou depois.
+
+IMPORTANTE: Se o documento for uma MATRÍCULA/RGI do imóvel, extraia TANTO os dados dos proprietários atuais (que são os vendedores) QUANTO os dados do imóvel.
+
+Se for MATRÍCULA/RGI, retorne:
+{
+  "tipoDocumento": "RGI",
+  "proprietarios": [
+    {
+      "nome": "nome completo",
+      "cpf": "CPF se visível",
+      "rg": "RG se visível", 
+      "nacionalidade": "ex: brasileiro(a)",
+      "estadoCivil": "Solteiro(a)|Casado(a)|Divorciado(a)|Viúvo(a)",
+      "profissao": "se visível",
+      "endereco": "endereço do proprietário"
+    }
+  ],
+  "imovel": {
+    "matricula": "número da matrícula",
+    "cartorio": "cartório ex: 1º Ofício de RI do RJ",
+    "endereco": "endereço completo do imóvel",
+    "numeroIPTU": "número IPTU se visível",
+    "tipoImovel": "Apartamento|Casa|Terreno|Sala Comercial|Loja|Galpão|Cobertura",
+    "areaTotal": "área em m²",
+    "vagasGaragem": "número de vagas"
+  }
+}
+
+Se for RG/CPF/Certidão/Comprovante (documentos pessoais), retorne:
+{
+  "tipoDocumento": "PESSOAL",
+  "nome": "nome completo",
+  "cpf": "CPF no formato 000.000.000-00",
+  "rg": "RG ou CNH",
+  "orgaoEmissor": "ex: SSP/RJ",
+  "nacionalidade": "ex: brasileiro(a)",
+  "estadoCivil": "Solteiro(a)|Casado(a)|Divorciado(a)|Viúvo(a)",
+  "profissao": "profissão",
+  "endereco": "endereço completo",
+  "telefone": "telefone se visível",
+  "email": "email se visível"
+}
+
+Retorne JSON.
 
 Campos a extrair (omita se não encontrar):
 - nome: nome completo
@@ -1469,11 +1513,45 @@ Retorne JSON com TODOS os campos encontrados.`;
     
     // Aplicar dados extraídos
     if(category==='vendedores'){
-      const firstVend=vendedores[0]?.id||'p1';
-      applyMultiExtracted(extracted,firstVend);
+      // Detectar se é RGI (tem dados de imóvel)
+      if(extracted.tipoDocumento==='RGI' && extracted.proprietarios && extracted.imovel){
+        // É RGI! Aplicar proprietários como vendedores
+        extracted.proprietarios.forEach((prop,idx)=>{
+          while(vendedores.length <= idx){
+            addPessoa('vend');
+          }
+          const vendId=vendedores[idx]?.id;
+          if(vendId){
+            applyMultiExtracted(prop,vendId);
+          }
+        });
+        // Aplicar dados do imóvel também
+        applyMultiExtracted(extracted.imovel,'');
+        // Atualizar contagem
+        document.getElementById('vendCount').textContent=vendedores.length+(vendedores.length===1?' parte':' partes');
+      }else{
+        // Documento pessoal normal
+        const firstVend=vendedores[0]?.id||'p1';
+        applyMultiExtracted(extracted,firstVend);
+      }
     }else if(category==='compradores'){
-      const firstComp=compradores[0]?.id||'p2';
-      applyMultiExtracted(extracted,firstComp);
+      // Mesma lógica para compradores
+      if(extracted.tipoDocumento==='RGI' && extracted.proprietarios && extracted.imovel){
+        extracted.proprietarios.forEach((prop,idx)=>{
+          while(compradores.length <= idx){
+            addPessoa('comp');
+          }
+          const compId=compradores[idx]?.id;
+          if(compId){
+            applyMultiExtracted(prop,compId);
+          }
+        });
+        applyMultiExtracted(extracted.imovel,'');
+        document.getElementById('compCount').textContent=compradores.length+(compradores.length===1?' parte':' partes');
+      }else{
+        const firstComp=compradores[0]?.id||'p2';
+        applyMultiExtracted(extracted,firstComp);
+      }
     }else if(category==='imovel'){
       // Aplicar dados do imóvel
       applyMultiExtracted(extracted,'');
