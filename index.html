@@ -105,7 +105,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:1
 .model-card:hover .mc-upload-btn{opacity:1;transform:translateY(0)}
 .mc-upload-btn:hover{border-color:var(--brand);background:var(--brand-bg-soft);color:var(--brand-dk)}
 .mc-icon{font-size:28px;margin-bottom:10px;line-height:1}
-.mc-tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:5px;margin-bottom:10px}
+.mc-tag-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.mc-tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:5px}
+.mc-upload-btn{padding:4px 10px;background:#fff;border:1.5px solid var(--line-2);border-radius:6px;font-size:10px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:all .15s;font-family:var(--font-b);opacity:0;white-space:nowrap}
+.model-card:hover .mc-upload-btn{opacity:1}
+.mc-upload-btn:hover{border-color:var(--brand);background:var(--brand-bg-soft);color:var(--brand-dk)}
 .mc-name{font-family:var(--font-d);font-size:17px;color:var(--ink);margin-bottom:5px;font-weight:600;line-height:1.25}
 .mc-desc{font-size:12px;color:var(--muted);line-height:1.55}
 
@@ -1242,13 +1246,15 @@ function renderModelGrid(){
     <div class="model-card${selectedId===m.id?' selected':''}" style="--card-accent:${m.accent};--card-accent-bg:${m.accentBg}" onclick="selectModel('${m.id}')">
       <div class="mc-check">✓</div>
       <div class="mc-icon">${m.icon||'📄'}</div>
-      <div class="mc-tag" style="background:${m.accentBg};color:${m.accentFg}">${m.tag||'Personalizado'}</div>
+      <div class="mc-tag-row">
+        <div class="mc-tag" style="background:${m.accentBg};color:${m.accentFg}">${m.tag||'Personalizado'}</div>
+        <button class="mc-upload-btn" onclick="event.stopPropagation();document.getElementById('tplInput-${m.id}').click()" title="Enviar modelo Word">
+          📎 ${modelFiles[m.id]?'Trocar':'Enviar'}
+        </button>
+      </div>
       <div class="mc-name">${m.full||m.nome}</div>
       <div class="mc-desc">${m.desc}</div>
       <div class="mc-saved${modelFiles[m.id]?.name?' on':''}">✓ ${modelFiles[m.id]?.name||'Modelo salvo'}</div>
-      <button class="mc-upload-btn" onclick="event.stopPropagation();document.getElementById('tplInput-${m.id}').click()" title="Enviar modelo Word">
-        📎 ${modelFiles[m.id]?'Trocar':'Enviar'} Modelo
-      </button>
       <input type="file" id="tplInput-${m.id}" accept=".docx,.doc" style="display:none" onchange="uploadTemplate(event,'${m.id}')">
     </div>`).join('');
 }
